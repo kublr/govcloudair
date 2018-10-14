@@ -4,8 +4,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/kradalby/govcloudair/testutil"
-	"github.com/kradalby/govcloudair/types/v56"
+	"github.com/kublr/govcloudair/testutil"
+	"github.com/kublr/govcloudair/types/v56"
 	. "gopkg.in/check.v1"
 )
 
@@ -32,7 +32,7 @@ func (s *K) SetUpSuite(c *C) {
 	}
 
 	testServer.ResponseMap(5, testutil.ResponseMap{
-		"/api/versions": testutil.Response{200, map[string]string{}, vcdversions},
+		"/api/versions": testutil.Response{Status: 200, Headers: map[string]string{}, Body: vcdversions},
 	})
 
 	s.org, s.vdc, err = s.client.Authenticate("username", "password", "organization", "VDC")
@@ -57,7 +57,7 @@ func TestClient_getloginurl(t *testing.T) {
 
 	// Set up a correct conversation
 	testServer.ResponseMap(200, testutil.ResponseMap{
-		"/api/versions": testutil.Response{200, nil, vcdversions},
+		"/api/versions": testutil.Response{Status: 200, Body: vcdversions},
 	})
 
 	err = client.vcdloginurl()
@@ -84,10 +84,10 @@ func TestVCDClient_Authenticate(t *testing.T) {
 
 	// OK auth
 	testServer.ResponseMap(5, testutil.ResponseMap{
-		"/api/versions":                                 testutil.Response{200, nil, vcdversions},
-		"/api/sessions":                                 testutil.Response{201, vcdauthheader, vcdsessions},
-		"/api/org/00000000-0000-0000-0000-000000000000": testutil.Response{201, vcdauthheader, vcdorg},
-		"/api/vdc/00000000-0000-0000-0000-000000000000": testutil.Response{201, vcdauthheader, vcdorg},
+		"/api/versions": testutil.Response{Status: 200, Body: vcdversions},
+		"/api/sessions": testutil.Response{Status: 201, Headers: vcdauthheader, Body: vcdsessions},
+		"/api/org/00000000-0000-0000-0000-000000000000": testutil.Response{Status: 201, Headers: vcdauthheader, Body: vcdorg},
+		"/api/vdc/00000000-0000-0000-0000-000000000000": testutil.Response{Status: 201, Headers: vcdauthheader, Body: vcdorg},
 	})
 
 	org, _, err := client.Authenticate("username", "password", "organization", "organization vDC")

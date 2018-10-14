@@ -332,7 +332,6 @@ type NetworkConnection struct {
 	MACAddress              string           `xml:"MACAddress,omitempty"`              // MAC address associated with the NIC.
 	IPAddressAllocationMode IPAllocationMode `xml:"IpAddressAllocationMode"`           // IP address allocation mode for this connection. One of: POOL (A static IP address is allocated automatically from a pool of addresses.) DHCP (The IP address is obtained from a DHCP service.) MANUAL (The IP address is assigned manually in the IpAddress element.) NONE (No IP addressing mode specified.)
 	NetworkAdapterType      string           `xml:"NetworkAdapterType"`                // Set the adapter type (e.g. E1000, E1000E, VMXNET3)
-
 }
 
 // NetworkConnectionSection the container for the network connections of this virtual machine.
@@ -1055,8 +1054,8 @@ type VM struct {
 }
 
 type BootOptions struct {
-	BootDelay      int64 `xml:BootOptions,omitempty`
-	EnterBIOSSetup bool  `xml:EnterBIOSSetup,omitempty`
+	BootDelay      int64 `xml:"BootOptions,omitempty"`
+	EnterBIOSSetup bool  `xml:"EnterBIOSSetup,omitempty"`
 	Link           *Link `xml:"vcloud:Link"`
 }
 
@@ -1814,7 +1813,7 @@ type QueryResultVAppRecordType struct {
 	MemoryAllocationMB      int    `xml:"memoryAllocationMB,attr,omitempty"`
 	AutoDeleteNotified      bool   `xml:"isAutoDeleteNotified,attr,omitempty"`
 	AutoUndeployNotified    bool   `xml:"isAutoUndeployNotified,attr,omitempty"`
-	VdcEnabled              bool   `xml:"isVdcEnabled, attr,omitempty"`
+	VdcEnabled              bool   `xml:"isVdcEnabled,attr,omitempty"`
 	HonorBootOrder          bool   `xml:"honorBookOrder,attr,omitempty"`
 	HighestSupportedVersion int    `xml:"pvdcHighestSupportedHardwareVersion,attr,omitempty"`
 	LowestHardwareVersion   int    `xml:"lowestHardwareVersionInVApp,attr,omitempty"`

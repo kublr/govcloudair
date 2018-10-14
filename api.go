@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"net/url"
 
-	types "github.com/kradalby/govcloudair/types/v56"
+	"github.com/kublr/govcloudair/types/v56"
 )
 
 // Client provides a client to vCloud Air, values can be populated automatically using the Authenticate method.
@@ -100,10 +100,10 @@ func checkResp(resp *http.Response, err error) (*http.Response, error) {
 	// Valid request, return the response.
 	case i == 200 || i == 201 || i == 202 || i == 204:
 		return resp, nil
-	// Invalid request, parse the XML error returned and return it.
+		// Invalid request, parse the XML error returned and return it.
 	case i == 400 || i == 401 || i == 403 || i == 404 || i == 405 || i == 406 || i == 409 || i == 415 || i == 500 || i == 503 || i == 504:
 		return nil, parseErr(resp)
-	// Unhandled response.
+		// Unhandled response.
 	default:
 		return nil, fmt.Errorf("unhandled API response, please report this issue, status code: %s", resp.Status)
 	}

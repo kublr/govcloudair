@@ -1,37 +1,35 @@
-TEST?=./...
-GOFMT_FILES?=$$(find . -name '*.go' | grep -v vendor)
+all: test
 
-default: fmt test testrace vet
+GOOS ?=
+GOBINARY ?= go
 
-# test runs the test suite and vets the code
-test: get-deps fmtcheck
-	@golint ./...
-	@echo "==> Running Tests"
-	@go list $(TEST) | xargs -n1 go test -timeout=60s -parallel=10 $(TESTARGS)
+SOURCE=$$($(GOBINARY) list ./... | grep -v /vendor/ | grep -v /gen/)
+SOURCE_FILES?=$$(find . -name '*.go' | grep -v /vendor/ | grep -v /gen/)
 
-# testrace runs the race checker
-testrace:
-	@go list $(TEST) | xargs -n1 go test -race $(TESTARGS)
+deps:
+	$(GOBINARY) get -u github.com/golang/dep/cmd/dep
+	$(GOBINARY) get -u golang.org/x/lint/golint
+.PHONY: deps
 
-# vet runs the Go source code static analysis tool `vet` to find
-# any common errors.
-vet:
-	@echo "==> Running Go Vet"
-	@go vet $$(go list ./... | grep -v vendor/) ; if [ $$? -eq 1 ]; then \
-		echo ""; \
-		echo "Vet found suspicious constructs. Please check the reported constructs"; \
-		echo "and fix them if necessary before submitting the code for review."; \
-		exit 1; \
-	fi
+deps-install:
+	$(ENVVAR) GOOS=$(GOOS) dep ensure -v
+.PHONY: deps-install
 
-get-deps:
-	@echo "==> Fetching dependencies"
-	@go get -v $(TEST)
-	@go get -u github.com/golang/lint/golint
-	
+deps-update:
+	$(ENVVAR) GOOS=$(GOOS) dep ensure
+.PHONY: deps-update
 
-fmt:
-	gofmt -w $(GOFMT_FILES)
+codestyle:
+	@echo "==> Running codestyle checks"
+	GOOS=$(GOOS) gofmt -l -e -d -s $(SOURCE_FILES)
+	GOOS=$(GOOS) test -z "$(shell gofmt -l $(SOURCE_FILES))"
 
-fmtcheck:
-	@sh -c "'$(CURDIR)/scripts/gofmtcheck.sh'"
+	GOOS=$(GOOS) golint $(SOURCE)
+
+	GOOS=$(GOOS) $(GOBINARY) vet $(SOURCE)
+.PHONY: codestyle
+
+test: codestyle
+	@echo "==> Running tests"
+	GOOS=$(GOOS) $(GOBINARY) test -v $(SOURCE)
+.PHONY: test

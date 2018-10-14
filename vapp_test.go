@@ -5,8 +5,8 @@
 package govcloudair
 
 import (
-	"github.com/kradalby/govcloudair/testutil"
-	"github.com/kradalby/govcloudair/types/v56"
+	"github.com/kublr/govcloudair/testutil"
+	"github.com/kublr/govcloudair/types/v56"
 
 	. "gopkg.in/check.v1"
 )
@@ -14,13 +14,13 @@ import (
 func (s *S) Test_ComposeVApp(c *C) {
 
 	testServer.ResponseMap(7, testutil.ResponseMap{
-		"/api/org/11111111-1111-1111-1111-111111111111":                       testutil.Response{200, nil, orgExample},
-		"/api/network/44444444-4444-4444-4444-4444444444444":                  testutil.Response{200, nil, orgvdcnetExample},
-		"/api/catalog/e8a20fdf-8a78-440c-ac71-0420db59f854":                   testutil.Response{200, nil, catalogExample},
-		"/api/catalogItem/1176e485-8858-4e15-94e5-ae4face605ae":               testutil.Response{200, nil, catalogitemExample},
-		"/api/vAppTemplate/vappTemplate-40cb9721-5f1a-44f9-b5c3-98c5f518c4f5": testutil.Response{200, nil, vapptemplateExample},
-		"/api/vdc/00000000-0000-0000-0000-000000000000/action/composeVApp":    testutil.Response{200, nil, instantiatedvappExample},
-		"/api/vApp/vapp-00000000-0000-0000-0000-000000000000":                 testutil.Response{200, nil, vappExample},
+		"/api/org/11111111-1111-1111-1111-111111111111":                       testutil.Response{Status: 200, Headers: nil, Body: orgExample},
+		"/api/network/44444444-4444-4444-4444-4444444444444":                  testutil.Response{Status: 200, Headers: nil, Body: orgvdcnetExample},
+		"/api/catalog/e8a20fdf-8a78-440c-ac71-0420db59f854":                   testutil.Response{Status: 200, Headers: nil, Body: catalogExample},
+		"/api/catalogItem/1176e485-8858-4e15-94e5-ae4face605ae":               testutil.Response{Status: 200, Headers: nil, Body: catalogitemExample},
+		"/api/vAppTemplate/vappTemplate-40cb9721-5f1a-44f9-b5c3-98c5f518c4f5": testutil.Response{Status: 200, Headers: nil, Body: vapptemplateExample},
+		"/api/vdc/00000000-0000-0000-0000-000000000000/action/composeVApp":    testutil.Response{Status: 200, Headers: nil, Body: instantiatedvappExample},
+		"/api/vApp/vapp-00000000-0000-0000-0000-000000000000":                 testutil.Response{Status: 200, Headers: nil, Body: vappExample},
 	})
 
 	// Populate OrgVDCNetwork

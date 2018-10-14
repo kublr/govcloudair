@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	types "github.com/kradalby/govcloudair/types/v56"
+	"github.com/kublr/govcloudair/types/v56"
 )
 
 type VCDClient struct {
@@ -96,7 +96,7 @@ func (c *VCDClient) vcdauthorize(user, pass, org string) error {
 	err = decodeBody(resp, session)
 
 	if err != nil {
-		fmt.Errorf("error decoding session response: %s", err)
+		return fmt.Errorf("error decoding session response: %s", err)
 	}
 
 	org_found := false

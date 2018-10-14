@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"strconv"
 
-	types "github.com/kradalby/govcloudair/types/v56"
+	"github.com/kublr/govcloudair/types/v56"
 )
 
 type VM struct {
@@ -68,7 +68,7 @@ func (v *VM) Reconfigure() (Task, error) {
 	// }
 
 	// WORKAROUND for XML namespace support in go, see bottom of types.go
-	// github.com/kradalby/govcloudair/types/v56
+	// github.com/kublr/govcloudair/types/v56
 	// v.CorrectAddressOnParentForNetworkHardware()
 
 	v.SetXMLNamespaces()

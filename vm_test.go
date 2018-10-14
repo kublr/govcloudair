@@ -6,7 +6,7 @@ package govcloudair
 
 import (
 	// "fmt"
-	"github.com/kradalby/govcloudair/testutil"
+	"github.com/kublr/govcloudair/testutil"
 	. "gopkg.in/check.v1"
 )
 
@@ -14,7 +14,7 @@ func (s *K) Test_FindVMByHREF(c *C) {
 
 	// Get the Org populated
 	testServer.ResponseMap(1, testutil.ResponseMap{
-		"/api/vApp/vm-11111111-1111-1111-1111-111111111111": testutil.Response{200, nil, vmExample},
+		"/api/vApp/vm-11111111-1111-1111-1111-111111111111": testutil.Response{Status: 200, Headers: nil, Body: vmExample},
 	})
 
 	vmHref := vcdu_api.String() + "/vApp/vm-11111111-1111-1111-1111-111111111111"

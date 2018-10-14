@@ -3,19 +3,26 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:6c2f939d99ad2074a4113c36aa93fa792ede8ff0b8cdb97634b41b9c5da7fab6"
   name = "github.com/jinzhu/copier"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "7e38e58719c33e0d44d585c4ab477a30f8cb82dd"
 
 [[projects]]
   branch = "v1"
+  digest = "1:0c0dfc6cf4abe5dab1ed03118f6cff3ac7345317dce2f35b32fe820b0154f6a1"
   name = "gopkg.in/check.v1"
   packages = ["."]
+  pruneopts = "NUT"
   revision = "20d25e2804050c1cd24a7eea1e7a6447dd0e74ec"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ce064f197d681c46acb45a961d86d57065b72ffe5d41371348bd92ce9e9be0df"
+  input-imports = [
+    "github.com/jinzhu/copier",
+    "gopkg.in/check.v1",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

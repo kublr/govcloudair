@@ -6,7 +6,7 @@ package govcloudair
 
 import (
 	// "fmt"
-	"github.com/kradalby/govcloudair/testutil"
+	"github.com/kublr/govcloudair/testutil"
 	. "gopkg.in/check.v1"
 )
 
@@ -14,7 +14,7 @@ func (s *K) Test_Query(c *C) {
 
 	// Get the Org populated
 	testServer.ResponseMap(1, testutil.ResponseMap{
-		"/api/query?type=vm": testutil.Response{200, nil, queryVmExample},
+		"/api/query?type=vm": testutil.Response{Status: 200, Headers: nil, Body: queryVmExample},
 	})
 
 	results, err := s.client.Query(map[string]string{"type": "vm"})

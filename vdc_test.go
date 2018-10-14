@@ -5,7 +5,7 @@
 package govcloudair
 
 import (
-	"github.com/kradalby/govcloudair/testutil"
+	"github.com/kublr/govcloudair/testutil"
 
 	. "gopkg.in/check.v1"
 	"strconv"
@@ -108,8 +108,8 @@ func (s *S) Test_FindVApp(c *C) {
 	// c.Assert(err, IsNil)
 
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/vdc/00000000-0000-0000-0000-000000000000":       testutil.Response{200, nil, vdcExample},
-		"/api/vApp/vapp-00000000-0000-0000-0000-000000000000": testutil.Response{200, nil, vappExample},
+		"/api/vdc/00000000-0000-0000-0000-000000000000":       testutil.Response{Status: 200, Headers: nil, Body: vdcExample},
+		"/api/vApp/vapp-00000000-0000-0000-0000-000000000000": testutil.Response{Status: 200, Headers: nil, Body: vappExample},
 	})
 
 	_, err := s.vdc.FindVAppByName("myVApp")

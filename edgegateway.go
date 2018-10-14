@@ -15,7 +15,7 @@ import (
 	"regexp"
 	"time"
 
-	types "github.com/kradalby/govcloudair/types/v56"
+	"github.com/kublr/govcloudair/types/v56"
 )
 
 type EdgeGateway struct {
@@ -650,7 +650,7 @@ func (e *EdgeGateway) AddIpsecVPN(ipsecVPNConfig *types.EdgeGatewayServiceConfig
 
 	output, err := xml.MarshalIndent(ipsecVPNConfig, "  ", "    ")
 	if err != nil {
-		fmt.Errorf("error marshaling ipsecVPNConfig compose: %s", err)
+		return Task{}, fmt.Errorf("error marshaling ipsecVPNConfig compose: %s", err)
 	}
 
 	debug := os.Getenv("GOVCLOUDAIR_DEBUG")

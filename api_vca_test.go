@@ -12,7 +12,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kradalby/govcloudair/testutil"
+	"github.com/kublr/govcloudair/testutil"
 	. "gopkg.in/check.v1"
 )
 
@@ -48,11 +48,11 @@ func (s *S) SetUpSuite(c *C) {
 	}
 
 	testServer.ResponseMap(5, testutil.ResponseMap{
-		"/api/vchs/sessions":                                                                                            testutil.Response{201, authheader, vaauthorization},
-		"/api/vchs/services":                                                                                            testutil.Response{200, nil, vaservices},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{200, nil, vacompute},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{201, nil, vabackend},
-		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{200, nil, vdcExample},
+		"/api/vchs/sessions": testutil.Response{Status: 201, Headers: authheader, Body: vaauthorization},
+		"/api/vchs/services": testutil.Response{Status: 200, Headers: nil, Body: vaservices},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{Status: 200, Body: vacompute},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{Status: 201, Body: vabackend},
+		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{Status: 200, Body: vdcExample},
 	})
 
 	s.vdc, err = s.client.Authenticate("username", "password", "CI123456-789", "VDC12345-6789")
@@ -490,11 +490,11 @@ func TestVAClient_Authenticate(t *testing.T) {
 
 	// Botched auth
 	testServer.ResponseMap(5, testutil.ResponseMap{
-		"/api/vchs/sessions":                                                                                            testutil.Response{401, nil, vcdError},
-		"/api/vchs/services":                                                                                            testutil.Response{200, nil, vaservices},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{200, nil, vacompute},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{201, nil, vabackend},
-		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{200, nil, vdcExample},
+		"/api/vchs/sessions": testutil.Response{Status: 401, Body: vcdError},
+		"/api/vchs/services": testutil.Response{Status: 200, Body: vaservices},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{Status: 200, Body: vacompute},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{Status: 201, Body: vabackend},
+		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{Status: 200, Body: vdcExample},
 	})
 
 	_, err = client.Authenticate("username", "password", "CI123456-789", "VDC12345-6789")
@@ -506,11 +506,11 @@ func TestVAClient_Authenticate(t *testing.T) {
 
 	// Botched services
 	testServer.ResponseMap(5, testutil.ResponseMap{
-		"/api/vchs/sessions":                                                                                            testutil.Response{201, authheader, vaauthorization},
-		"/api/vchs/services":                                                                                            testutil.Response{500, nil, vcdError},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{200, nil, vacompute},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{201, nil, vabackend},
-		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{200, nil, vdcExample},
+		"/api/vchs/sessions": testutil.Response{Status: 201, Headers: authheader, Body: vaauthorization},
+		"/api/vchs/services": testutil.Response{Status: 500, Body: vcdError},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{Status: 200, Body: vacompute},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{Status: 201, Body: vabackend},
+		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{Status: 200, Body: vdcExample},
 	})
 
 	_, err = client.Authenticate("username", "password", "CI123456-789", "VDC12345-6789")
@@ -522,11 +522,11 @@ func TestVAClient_Authenticate(t *testing.T) {
 
 	// Botched compute
 	testServer.ResponseMap(5, testutil.ResponseMap{
-		"/api/vchs/sessions":                                                                                            testutil.Response{201, authheader, vaauthorization},
-		"/api/vchs/services":                                                                                            testutil.Response{200, nil, vaservices},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{500, nil, vcdError},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{201, nil, vabackend},
-		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{200, nil, vdcExample},
+		"/api/vchs/sessions": testutil.Response{Status: 201, Headers: authheader, Body: vaauthorization},
+		"/api/vchs/services": testutil.Response{Status: 200, Body: vaservices},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{Status: 500, Body: vcdError},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{Status: 201, Body: vabackend},
+		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{Status: 200, Body: vdcExample},
 	})
 
 	_, err = client.Authenticate("username", "password", "CI123456-789", "VDC12345-6789")
@@ -538,11 +538,11 @@ func TestVAClient_Authenticate(t *testing.T) {
 
 	// Botched backend
 	testServer.ResponseMap(5, testutil.ResponseMap{
-		"/api/vchs/sessions":                                                                                            testutil.Response{201, authheader, vaauthorization},
-		"/api/vchs/services":                                                                                            testutil.Response{200, nil, vaservices},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{200, nil, vacompute},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{500, nil, vcdError},
-		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{200, nil, vdcExample},
+		"/api/vchs/sessions": testutil.Response{Status: 201, Headers: authheader, Body: vaauthorization},
+		"/api/vchs/services": testutil.Response{Status: 200, Body: vaservices},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{Status: 200, Body: vacompute},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{Status: 500, Body: vcdError},
+		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{Status: 200, Body: vdcExample},
 	})
 
 	_, err = client.Authenticate("username", "password", "CI123456-789", "VDC12345-6789")
@@ -554,11 +554,11 @@ func TestVAClient_Authenticate(t *testing.T) {
 
 	// Botched vdc
 	testServer.ResponseMap(5, testutil.ResponseMap{
-		"/api/vchs/sessions":                                                                                            testutil.Response{201, authheader, vaauthorization},
-		"/api/vchs/services":                                                                                            testutil.Response{200, nil, vaservices},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{200, nil, vacompute},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{201, nil, vabackend},
-		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{500, nil, vcdError},
+		"/api/vchs/sessions": testutil.Response{Status: 201, Headers: authheader, Body: vaauthorization},
+		"/api/vchs/services": testutil.Response{Status: 200, Body: vaservices},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{Status: 200, Body: vacompute},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{Status: 201, Body: vabackend},
+		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{Status: 500, Body: vcdError},
 	})
 
 	_, err = client.Authenticate("username", "password", "CI123456-789", "VDC12345-6789")
@@ -581,11 +581,11 @@ func makeClient(t *testing.T) VAClient {
 	}
 
 	testServer.ResponseMap(5, testutil.ResponseMap{
-		"/api/vchs/sessions":                                                                                            testutil.Response{201, authheader, vaauthorization},
-		"/api/vchs/services":                                                                                            testutil.Response{200, nil, vaservices},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{200, nil, vacompute},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{201, nil, vabackend},
-		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{200, nil, vdcExample},
+		"/api/vchs/sessions": testutil.Response{Status: 201, Headers: authheader, Body: vaauthorization},
+		"/api/vchs/services": testutil.Response{Status: 200, Body: vaservices},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{Status: 200, Body: vacompute},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{Status: 201, Body: vabackend},
+		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{Status: 200, Body: vdcExample},
 	})
 
 	_, err = client.Authenticate("username", "password", "CI123456-789", "VDC12345-6789")
@@ -629,11 +629,11 @@ func TestClient_parseErr(t *testing.T) {
 
 	// I'M A TEAPOT!
 	testServer.ResponseMap(5, testutil.ResponseMap{
-		"/api/vchs/sessions":                                                                                            testutil.Response{201, authheader, vaauthorization},
-		"/api/vchs/services":                                                                                            testutil.Response{200, nil, vaservices},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{200, nil, vacompute},
-		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{418, nil, notfoundErr},
-		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{200, nil, vdcExample},
+		"/api/vchs/sessions": testutil.Response{Status: 201, Headers: authheader, Body: vaauthorization},
+		"/api/vchs/services": testutil.Response{Status: 200, Body: vaservices},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000":                                                        testutil.Response{Status: 200, Body: vacompute},
+		"/api/vchs/compute/00000000-0000-0000-0000-000000000000/vdc/00000000-0000-0000-0000-000000000000/vcloudsession": testutil.Response{Status: 418, Body: notfoundErr},
+		"/api/vdc/00000000-0000-0000-0000-000000000000":                                                                 testutil.Response{Status: 200, Body: vdcExample},
 	})
 
 	_, err = client.Authenticate("username", "password", "CI123456-789", "VDC12345-6789")

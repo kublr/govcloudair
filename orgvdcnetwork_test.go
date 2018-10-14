@@ -5,7 +5,7 @@
 package govcloudair
 
 import (
-	"github.com/kradalby/govcloudair/testutil"
+	"github.com/kublr/govcloudair/testutil"
 
 	. "gopkg.in/check.v1"
 )
@@ -14,7 +14,7 @@ func (s *S) Test_NetRefresh(c *C) {
 
 	// Get the Org populated
 	testServer.ResponseMap(1, testutil.ResponseMap{
-		"/api/network/44444444-4444-4444-4444-4444444444444": testutil.Response{200, nil, orgvdcnetExample},
+		"/api/network/44444444-4444-4444-4444-4444444444444": testutil.Response{Status: 200, Body: orgvdcnetExample},
 	})
 
 	network, err := s.vdc.FindVDCNetwork("networkName")

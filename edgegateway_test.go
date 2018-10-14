@@ -5,8 +5,8 @@
 package govcloudair
 
 import (
-	"github.com/kradalby/govcloudair/testutil"
-	types "github.com/kradalby/govcloudair/types/v56"
+	"github.com/kublr/govcloudair/testutil"
+	"github.com/kublr/govcloudair/types/v56"
 	. "gopkg.in/check.v1"
 )
 
@@ -14,8 +14,8 @@ func (s *S) Test_Refresh(c *C) {
 
 	// Get the Org populated
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/vdc/00000000-0000-0000-0000-000000000000/edgeGateways":  testutil.Response{200, nil, edgegatewayqueryresultsExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000": testutil.Response{200, nil, edgegatewayExample},
+		"/api/vdc/00000000-0000-0000-0000-000000000000/edgeGateways":  testutil.Response{Status: 200, Body: edgegatewayqueryresultsExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000": testutil.Response{Status: 200, Body: edgegatewayExample},
 	})
 
 	edge, err := s.vdc.FindEdgeGateway("M916272752-5793")
@@ -37,8 +37,8 @@ func (s *S) Test_Refresh(c *C) {
 
 func (s *S) Test_NATMapping(c *C) {
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/vdc/00000000-0000-0000-0000-000000000000/edgeGateways":  testutil.Response{200, nil, edgegatewayqueryresultsExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000": testutil.Response{200, nil, edgegatewayExample},
+		"/api/vdc/00000000-0000-0000-0000-000000000000/edgeGateways":  testutil.Response{Status: 200, Body: edgegatewayqueryresultsExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000": testutil.Response{Status: 200, Body: edgegatewayExample},
 	})
 
 	edge, err := s.vdc.FindEdgeGateway("M916272752-5793")
@@ -49,8 +49,8 @@ func (s *S) Test_NATMapping(c *C) {
 	c.Assert(edge.EdgeGateway.Name, Equals, "M916272752-5793")
 
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{200, nil, edgegatewayExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{200, nil, taskExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{Status: 200, Body: edgegatewayExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{Status: 200, Body: taskExample},
 	})
 
 	_, err = edge.AddNATMapping("DNAT", "10.0.0.1", "20.0.0.2", "77")
@@ -59,8 +59,8 @@ func (s *S) Test_NATMapping(c *C) {
 	c.Assert(err, IsNil)
 
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{200, nil, edgegatewayExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{200, nil, taskExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{Status: 200, Body: edgegatewayExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{Status: 200, Body: taskExample},
 	})
 
 	_, err = edge.RemoveNATMapping("DNAT", "10.0.0.1", "20.0.0.2", "77")
@@ -72,8 +72,8 @@ func (s *S) Test_NATMapping(c *C) {
 
 func (s *S) Test_NATPortMapping(c *C) {
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/vdc/00000000-0000-0000-0000-000000000000/edgeGateways":  testutil.Response{200, nil, edgegatewayqueryresultsExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000": testutil.Response{200, nil, edgegatewayExample},
+		"/api/vdc/00000000-0000-0000-0000-000000000000/edgeGateways":  testutil.Response{Status: 200, Body: edgegatewayqueryresultsExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000": testutil.Response{Status: 200, Body: edgegatewayExample},
 	})
 
 	edge, err := s.vdc.FindEdgeGateway("M916272752-5793")
@@ -84,8 +84,8 @@ func (s *S) Test_NATPortMapping(c *C) {
 	c.Assert(edge.EdgeGateway.Name, Equals, "M916272752-5793")
 
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{200, nil, edgegatewayExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{200, nil, taskExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{Status: 200, Body: edgegatewayExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{Status: 200, Body: taskExample},
 	})
 
 	_, err = edge.AddNATPortMapping("DNAT", "10.0.0.1", "1177", "20.0.0.2", "77")
@@ -94,8 +94,8 @@ func (s *S) Test_NATPortMapping(c *C) {
 	c.Assert(err, IsNil)
 
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{200, nil, edgegatewayExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{200, nil, taskExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{Status: 200, Body: edgegatewayExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{Status: 200, Body: taskExample},
 	})
 
 	_, err = edge.RemoveNATPortMapping("DNAT", "10.0.0.1", "1177", "20.0.0.2", "77")
@@ -108,8 +108,8 @@ func (s *S) Test_NATPortMapping(c *C) {
 func (s *S) Test_1to1Mappings(c *C) {
 
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/vdc/00000000-0000-0000-0000-000000000000/edgeGateways":  testutil.Response{200, nil, edgegatewayqueryresultsExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000": testutil.Response{200, nil, edgegatewayExample},
+		"/api/vdc/00000000-0000-0000-0000-000000000000/edgeGateways":  testutil.Response{Status: 200, Body: edgegatewayqueryresultsExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000": testutil.Response{Status: 200, Body: edgegatewayExample},
 	})
 
 	edge, err := s.vdc.FindEdgeGateway("M916272752-5793")
@@ -120,8 +120,8 @@ func (s *S) Test_1to1Mappings(c *C) {
 	c.Assert(edge.EdgeGateway.Name, Equals, "M916272752-5793")
 
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{200, nil, edgegatewayExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{200, nil, taskExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{Status: 200, Body: edgegatewayExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{Status: 200, Body: taskExample},
 	})
 
 	_, err = edge.Create1to1Mapping("10.0.0.1", "20.0.0.2", "description")
@@ -130,8 +130,8 @@ func (s *S) Test_1to1Mappings(c *C) {
 	c.Assert(err, IsNil)
 
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{200, nil, edgegatewayExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{200, nil, taskExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{Status: 200, Body: edgegatewayExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{Status: 200, Body: taskExample},
 	})
 
 	_, err = edge.Remove1to1Mapping("10.0.0.1", "20.0.0.2")
@@ -143,8 +143,8 @@ func (s *S) Test_1to1Mappings(c *C) {
 
 func (s *S) Test_AddIpsecVPN(c *C) {
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/vdc/00000000-0000-0000-0000-000000000000/edgeGateways":  testutil.Response{200, nil, edgegatewayqueryresultsExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000": testutil.Response{200, nil, edgegatewayExample},
+		"/api/vdc/00000000-0000-0000-0000-000000000000/edgeGateways":  testutil.Response{Status: 200, Body: edgegatewayqueryresultsExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000": testutil.Response{Status: 200, Body: edgegatewayExample},
 	})
 
 	edge, err := s.vdc.FindEdgeGateway("M916272752-5793")
@@ -155,8 +155,8 @@ func (s *S) Test_AddIpsecVPN(c *C) {
 	c.Assert(edge.EdgeGateway.Name, Equals, "M916272752-5793")
 
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{200, nil, edgegatewayExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{200, nil, taskExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{Status: 200, Body: edgegatewayExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{Status: 200, Body: taskExample},
 	})
 
 	tunnel := &types.GatewayIpsecVpnTunnel{
@@ -189,8 +189,8 @@ func (s *S) Test_AddIpsecVPN(c *C) {
 	c.Assert(err, IsNil)
 
 	testServer.ResponseMap(2, testutil.ResponseMap{
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{200, nil, edgegatewayExample},
-		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{200, nil, taskExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000":                          testutil.Response{Status: 200, Body: edgegatewayExample},
+		"/api/admin/edgeGateway/00000000-0000-0000-0000-000000000000/action/configureServices": testutil.Response{Status: 200, Body: taskExample},
 	})
 }
 

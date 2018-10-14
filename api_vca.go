@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	types "github.com/kradalby/govcloudair/types/v56"
+	"github.com/kublr/govcloudair/types/v56"
 )
 
 // Client provides a client to vCloud Air, values can be populated automatically using the Authenticate method.
