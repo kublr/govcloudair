@@ -24,26 +24,23 @@ func NewCatalogItem(c *Client) *CatalogItem {
 }
 
 func (ci *CatalogItem) GetVAppTemplate() (VAppTemplate, error) {
-	url, err := url.ParseRequestURI(ci.CatalogItem.Entity.HREF)
-
+	u, err := url.ParseRequestURI(ci.CatalogItem.Entity.HREF)
 	if err != nil {
 		return VAppTemplate{}, fmt.Errorf("error decoding catalogitem response: %s", err)
 	}
 
-	req := ci.c.NewRequest(map[string]string{}, "GET", *url, nil)
-
+	req := ci.c.NewRequest(map[string]string{}, "GET", *u, nil)
 	resp, err := checkResp(ci.c.Http.Do(req))
 	if err != nil {
 		return VAppTemplate{}, fmt.Errorf("error retreiving vapptemplate: %s", err)
 	}
+	defer resp.Body.Close()
 
 	cat := NewVAppTemplate(ci.c)
-
 	if err = decodeBody(resp, cat.VAppTemplate); err != nil {
 		return VAppTemplate{}, fmt.Errorf("error decoding vapptemplate response: %s", err)
 	}
 
 	// The request was successful
 	return *cat, nil
-
 }

@@ -9,7 +9,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"regexp"
@@ -87,39 +86,33 @@ func (e *EdgeGateway) AddDhcpPool(network *types.OrgVDCNetwork, dhcppool []inter
 		return Task{}, fmt.Errorf("error reconfiguring Edge Gateway: %s", err)
 	}
 
-	var resp *http.Response
-	for {
-		b := bytes.NewBufferString(xml.Header + string(output))
+	b := bytes.NewBufferString(xml.Header + string(output))
+	s, _ := url.ParseRequestURI(e.EdgeGateway.HREF)
+	s.Path += "/action/configureServices"
 
-		s, _ := url.ParseRequestURI(e.EdgeGateway.HREF)
-		s.Path += "/action/configureServices"
+	req := e.c.NewRequest(map[string]string{}, "POST", *s, b)
+	log.Printf("[DEBUG] POSTING TO URL: %s", s.Path)
+	log.Printf("[DEBUG] XML TO SEND:\n%s", b)
 
-		req := e.c.NewRequest(map[string]string{}, "POST", *s, b)
-		log.Printf("[DEBUG] POSTING TO URL: %s", s.Path)
-		log.Printf("[DEBUG] XML TO SEND:\n%s", b)
+	req.Header.Add("Content-Type", "application/vnd.vmware.admin.edgeGatewayServiceConfiguration+xml")
 
-		req.Header.Add("Content-Type", "application/vnd.vmware.admin.edgeGatewayServiceConfiguration+xml")
-
-		resp, err = checkResp(e.c.Http.Do(req))
-		if err != nil {
-			if v, _ := regexp.MatchString("is busy completing an operation.$", err.Error()); v {
-				time.Sleep(3 * time.Second)
-				continue
-			}
-			return Task{}, fmt.Errorf("error reconfiguring Edge Gateway: %s", err)
+	resp, err := checkResp(e.c.Http.Do(req))
+	if err != nil {
+		if v, _ := regexp.MatchString("is busy completing an operation.$", err.Error()); v {
+			time.Sleep(3 * time.Second)
+			return e.AddDhcpPool(network, dhcppool)
 		}
-		break
+		return Task{}, fmt.Errorf("error reconfiguring Edge Gateway: %s", err)
 	}
+	defer resp.Body.Close()
 
 	task := NewTask(e.c)
-
 	if err = decodeBody(resp, task.Task); err != nil {
 		return Task{}, fmt.Errorf("error decoding Task response: %s", err)
 	}
 
 	// The request was successful
 	return *task, nil
-
 }
 
 func (e *EdgeGateway) RemoveNATMapping(nattype, externalIP, internalIP, port string) (Task, error) {
@@ -189,6 +182,7 @@ func (e *EdgeGateway) RemoveNATPortMapping(nattype, externalIP, externalPort str
 		log.Printf("[DEBUG] Error is: %#v", err)
 		return Task{}, fmt.Errorf("error reconfiguring Edge Gateway: %s", err)
 	}
+	defer resp.Body.Close()
 
 	task := NewTask(e.c)
 
@@ -290,6 +284,7 @@ func (e *EdgeGateway) AddNATPortMapping(nattype, externalIP, externalPort string
 		log.Printf("[DEBUG] Error is: %#v", err)
 		return Task{}, fmt.Errorf("error reconfiguring Edge Gateway: %s", err)
 	}
+	defer resp.Body.Close()
 
 	task := NewTask(e.c)
 
@@ -323,32 +318,27 @@ func (e *EdgeGateway) CreateFirewallRules(defaultAction string, rules []*types.F
 		return Task{}, fmt.Errorf("error: %v\n", err)
 	}
 
-	var resp *http.Response
-	for {
-		b := bytes.NewBufferString(xml.Header + string(output))
+	b := bytes.NewBufferString(xml.Header + string(output))
 
-		s, _ := url.ParseRequestURI(e.EdgeGateway.HREF)
-		s.Path += "/action/configureServices"
+	s, _ := url.ParseRequestURI(e.EdgeGateway.HREF)
+	s.Path += "/action/configureServices"
 
-		req := e.c.NewRequest(map[string]string{}, "POST", *s, b)
-		log.Printf("[DEBUG] POSTING TO URL: %s", s.Path)
-		log.Printf("[DEBUG] XML TO SEND:\n%s", b)
+	req := e.c.NewRequest(map[string]string{}, "POST", *s, b)
+	log.Printf("[DEBUG] POSTING TO URL: %s", s.Path)
+	log.Printf("[DEBUG] XML TO SEND:\n%s", b)
 
-		req.Header.Add("Content-Type", "application/vnd.vmware.admin.edgeGatewayServiceConfiguration+xml")
+	req.Header.Add("Content-Type", "application/vnd.vmware.admin.edgeGatewayServiceConfiguration+xml")
 
-		resp, err = checkResp(e.c.Http.Do(req))
-		if err != nil {
-			if v, _ := regexp.MatchString("is busy completing an operation.$", err.Error()); v {
-				time.Sleep(3 * time.Second)
-				continue
-			}
-			return Task{}, fmt.Errorf("error reconfiguring Edge Gateway: %s", err)
+	resp, err := checkResp(e.c.Http.Do(req))
+	if err != nil {
+		if v, _ := regexp.MatchString("is busy completing an operation.$", err.Error()); v {
+			time.Sleep(3 * time.Second)
+			return e.CreateFirewallRules(defaultAction, rules)
 		}
-		break
+		return Task{}, fmt.Errorf("error reconfiguring Edge Gateway: %s", err)
 	}
 
 	task := NewTask(e.c)
-
 	if err = decodeBody(resp, task.Task); err != nil {
 		return Task{}, fmt.Errorf("error decoding Task response: %s", err)
 	}
@@ -510,6 +500,7 @@ func (e *EdgeGateway) Remove1to1Mapping(internal, external string) (Task, error)
 	if err != nil {
 		return Task{}, fmt.Errorf("error reconfiguring Edge Gateway: %s", err)
 	}
+	defer resp.Body.Close()
 
 	task := NewTask(e.c)
 
@@ -629,6 +620,7 @@ func (e *EdgeGateway) Create1to1Mapping(internal, external, description string) 
 	if err != nil {
 		return Task{}, fmt.Errorf("error reconfiguring Edge Gateway: %s", err)
 	}
+	defer resp.Body.Close()
 
 	task := NewTask(e.c)
 
@@ -673,6 +665,7 @@ func (e *EdgeGateway) AddIpsecVPN(ipsecVPNConfig *types.EdgeGatewayServiceConfig
 	if err != nil {
 		return Task{}, fmt.Errorf("error reconfiguring Edge Gateway: %s", err)
 	}
+	defer resp.Body.Close()
 
 	task := NewTask(e.c)
 

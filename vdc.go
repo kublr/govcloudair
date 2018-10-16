@@ -36,6 +36,7 @@ func (c *Client) retrieveVDC() (Vdc, error) {
 	if err != nil {
 		return Vdc{}, fmt.Errorf("error retreiving vdc: %s", err)
 	}
+	defer resp.Body.Close()
 
 	vdc := NewVdc(c)
 
@@ -61,6 +62,7 @@ func (v *Vdc) Refresh() error {
 	if err != nil {
 		return fmt.Errorf("error retreiving Edge Gateway: %s", err)
 	}
+	defer resp.Body.Close()
 
 	// Empty struct before a new unmarshal, otherwise we end up with duplicate
 	// elements in slices.
@@ -77,49 +79,53 @@ func (v *Vdc) Refresh() error {
 }
 
 func (v *Vdc) FindVDCNetwork(network string) (OrgVDCNetwork, error) {
-
+	var ref *types.Reference
 	for _, an := range v.Vdc.AvailableNetworks {
-		for _, n := range an.Network {
-			if n.Name == network {
-				u, err := url.ParseRequestURI(n.HREF)
-				if err != nil {
-					return OrgVDCNetwork{}, fmt.Errorf("error decoding vdc response: %s", err)
-				}
-
-				req := v.c.NewRequest(map[string]string{}, "GET", *u, nil)
-
-				resp, err := checkResp(v.c.Http.Do(req))
-				if err != nil {
-					return OrgVDCNetwork{}, fmt.Errorf("error retreiving orgvdcnetwork: %s", err)
-				}
-
-				orgnet := NewOrgVDCNetwork(v.c)
-
-				if err = decodeBody(resp, orgnet.OrgVDCNetwork); err != nil {
-					return OrgVDCNetwork{}, fmt.Errorf("error decoding orgvdcnetwork response: %s", err)
-				}
-
-				// The request was successful
-				return *orgnet, nil
-
-			}
+		ref = an.Network.ForName(network)
+		if ref != nil {
+			break
 		}
 	}
 
-	return OrgVDCNetwork{}, fmt.Errorf("can't find VDC Network: %s", network)
+	if ref == nil {
+		return OrgVDCNetwork{}, fmt.Errorf("can't find VDC Network: %s", network)
+	}
+
+	u, err := url.ParseRequestURI(ref.HREF)
+	if err != nil {
+		return OrgVDCNetwork{}, fmt.Errorf("error decoding vdc response: %s", err)
+	}
+
+	req := v.c.NewRequest(map[string]string{}, "GET", *u, nil)
+	resp, err := checkResp(v.c.Http.Do(req))
+	if err != nil {
+		return OrgVDCNetwork{}, fmt.Errorf("error retreiving orgvdcnetwork: %s", err)
+	}
+	defer resp.Body.Close()
+
+	orgnet := NewOrgVDCNetwork(v.c)
+	if err = decodeBody(resp, orgnet.OrgVDCNetwork); err != nil {
+		return OrgVDCNetwork{}, fmt.Errorf("error decoding orgvdcnetwork response: %s", err)
+	}
+
+	// The request was successful
+	return *orgnet, nil
 }
 
 func (v *Vdc) FindStorageProfileReference(name string) (types.Reference, error) {
-
+	var ref *types.Reference
 	for _, sps := range v.Vdc.VdcStorageProfiles {
-		for _, sp := range sps.VdcStorageProfile {
-			if sp.Name == name {
-				return types.Reference{HREF: sp.HREF, Name: sp.Name}, nil
-			}
+		ref = sps.VdcStorageProfile.ForName(name)
+		if ref != nil {
+			break
 		}
+	}
+
+	if ref == nil {
 		return types.Reference{}, fmt.Errorf("can't find VDC Storage_profile: %s", name)
 	}
-	return types.Reference{}, fmt.Errorf("can't find any VDC Storage_profiles")
+
+	return *ref, nil
 }
 
 func (v *Vdc) GetDefaultStorageProfileReference() (types.Reference, error) {
@@ -140,6 +146,7 @@ func (v *Vdc) GetDefaultStorageProfileReference() (types.Reference, error) {
 	if err != nil {
 		return types.Reference{}, fmt.Errorf("error retrieving edge gateway records: %s", err)
 	}
+	defer resp.Body.Close()
 
 	storageprofiles := new(types.QueryResultRecordsType)
 
@@ -157,97 +164,86 @@ func (v *Vdc) GetDefaultStorageProfileReference() (types.Reference, error) {
 
 // Doesn't work with vCloud API 5.5, only vCloud Air
 func (v *Vdc) GetVDCOrg() (Org, error) {
-
-	for _, av := range v.Vdc.Link {
-		if av.Rel == "up" && av.Type == "application/vnd.vmware.vcloud.org+xml" {
-			u, err := url.ParseRequestURI(av.HREF)
-
-			if err != nil {
-				return Org{}, fmt.Errorf("error decoding vdc response: %s", err)
-			}
-
-			req := v.c.NewRequest(map[string]string{}, "GET", *u, nil)
-
-			resp, err := checkResp(v.c.Http.Do(req))
-			if err != nil {
-				return Org{}, fmt.Errorf("error retreiving org: %s", err)
-			}
-
-			org := NewOrg(v.c)
-
-			if err = decodeBody(resp, org.Org); err != nil {
-				return Org{}, fmt.Errorf("error decoding org response: %s", err)
-			}
-
-			// The request was successful
-			return *org, nil
-
-		}
+	link := v.Vdc.Link.ForType(types.MimeOrg, types.RelUp)
+	if link == nil {
+		return Org{}, fmt.Errorf("can't find VDC Org")
 	}
-	return Org{}, fmt.Errorf("can't find VDC Org")
+
+	u, err := url.ParseRequestURI(link.HREF)
+	if err != nil {
+		return Org{}, fmt.Errorf("error decoding vdc response: %s", err)
+	}
+
+	req := v.c.NewRequest(map[string]string{}, "GET", *u, nil)
+	resp, err := checkResp(v.c.Http.Do(req))
+	if err != nil {
+		return Org{}, fmt.Errorf("error retreiving org: %s", err)
+	}
+	defer resp.Body.Close()
+
+	org := NewOrg(v.c)
+	if err = decodeBody(resp, org.Org); err != nil {
+		return Org{}, fmt.Errorf("error decoding org response: %s", err)
+	}
+
+	// The request was successful
+	return *org, nil
 }
 
 func (v *Vdc) FindEdgeGateway(edgegateway string) (EdgeGateway, error) {
+	link := v.Vdc.Link.ForType("application/vnd.vmware.vcloud.query.records+xml", "edgeGateways")
+	if link == nil {
+		return EdgeGateway{}, fmt.Errorf("can't find Edge Gateway")
+	}
 
-	for _, av := range v.Vdc.Link {
-		if av.Rel == "edgeGateways" && av.Type == "application/vnd.vmware.vcloud.query.records+xml" {
-			u, err := url.ParseRequestURI(av.HREF)
+	u, err := url.ParseRequestURI(link.HREF)
+	if err != nil {
+		return EdgeGateway{}, fmt.Errorf("error decoding vdc response: %s", err)
+	}
 
-			if err != nil {
-				return EdgeGateway{}, fmt.Errorf("error decoding vdc response: %s", err)
-			}
+	// Querying the Result list
+	req := v.c.NewRequest(map[string]string{}, "GET", *u, nil)
+	resp, err := checkResp(v.c.Http.Do(req))
+	if err != nil {
+		return EdgeGateway{}, fmt.Errorf("error retrieving edge gateway records: %s", err)
+	}
+	defer resp.Body.Close()
 
-			// Querying the Result list
-			req := v.c.NewRequest(map[string]string{}, "GET", *u, nil)
+	query := new(types.QueryResultEdgeGatewayRecordsType)
+	if err = decodeBody(resp, query); err != nil {
+		return EdgeGateway{}, fmt.Errorf("error decoding edge gateway query response: %s", err)
+	}
 
-			resp, err := checkResp(v.c.Http.Do(req))
-			if err != nil {
-				return EdgeGateway{}, fmt.Errorf("error retrieving edge gateway records: %s", err)
-			}
-
-			query := new(types.QueryResultEdgeGatewayRecordsType)
-
-			if err = decodeBody(resp, query); err != nil {
-				return EdgeGateway{}, fmt.Errorf("error decoding edge gateway query response: %s", err)
-			}
-
-			var href string
-
-			for _, edge := range query.EdgeGatewayRecord {
-				if edge.Name == edgegateway {
-					href = edge.HREF
-				}
-			}
-
-			if href == "" {
-				return EdgeGateway{}, fmt.Errorf("can't find edge gateway with name: %s", edgegateway)
-			}
-
-			u, err = url.ParseRequestURI(href)
-			if err != nil {
-				return EdgeGateway{}, fmt.Errorf("error decoding edge gateway query response: %s", err)
-			}
-
-			// Querying the Result list
-			req = v.c.NewRequest(map[string]string{}, "GET", *u, nil)
-
-			resp, err = checkResp(v.c.Http.Do(req))
-			if err != nil {
-				return EdgeGateway{}, fmt.Errorf("error retrieving edge gateway: %s", err)
-			}
-
-			edge := NewEdgeGateway(v.c)
-
-			if err = decodeBody(resp, edge.EdgeGateway); err != nil {
-				return EdgeGateway{}, fmt.Errorf("error decoding edge gateway response: %s", err)
-			}
-
-			return *edge, nil
-
+	var href string
+	for _, edge := range query.EdgeGatewayRecord {
+		if edge.Name == edgegateway {
+			href = edge.HREF
 		}
 	}
-	return EdgeGateway{}, fmt.Errorf("can't find Edge Gateway")
 
+	if href == "" {
+		return EdgeGateway{}, fmt.Errorf("can't find edge gateway with name: %s", edgegateway)
+	}
+
+	u, err = url.ParseRequestURI(href)
+	if err != nil {
+		return EdgeGateway{}, fmt.Errorf("error decoding edge gateway query response: %s", err)
+	}
+
+	// Querying the Result list
+	req = v.c.NewRequest(map[string]string{}, "GET", *u, nil)
+	resp, err = checkResp(v.c.Http.Do(req))
+	if err != nil {
+		return EdgeGateway{}, fmt.Errorf("error retrieving edge gateway: %s", err)
+	}
+	defer resp.Body.Close()
+
+	edge := NewEdgeGateway(v.c)
+	if err = decodeBody(resp, edge.EdgeGateway); err != nil {
+		return EdgeGateway{}, fmt.Errorf("error decoding edge gateway response: %s", err)
+	}
+
+	return *edge, nil
 }
 
 func (v *Vdc) ComposeRawVApp(name string) error {
@@ -284,6 +280,7 @@ func (v *Vdc) ComposeRawVApp(name string) error {
 	if err != nil {
 		return fmt.Errorf("error instantiating a new vApp: %s", err)
 	}
+	defer resp.Body.Close()
 
 	task := NewTask(v.c)
 
@@ -306,41 +303,42 @@ func (v *Vdc) FindVAppByName(vapp string) (VApp, error) {
 		return VApp{}, fmt.Errorf("error refreshing vdc: %s", err)
 	}
 
+	var ref *types.ResourceReference
 	for _, resents := range v.Vdc.ResourceEntities {
 		for _, resent := range resents.ResourceEntity {
-
 			if resent.Name == vapp && resent.Type == "application/vnd.vmware.vcloud.vApp+xml" {
-
-				u, err := url.ParseRequestURI(resent.HREF)
-
-				if err != nil {
-					return VApp{}, fmt.Errorf("error decoding vdc response: %s", err)
-				}
-
-				// Querying the VApp
-				req := v.c.NewRequest(map[string]string{}, "GET", *u, nil)
-
-				resp, err := checkResp(v.c.Http.Do(req))
-				if err != nil {
-					return VApp{}, fmt.Errorf("error retrieving vApp: %s", err)
-				}
-
-				newvapp := NewVApp(v.c)
-
-				if err = decodeBody(resp, newvapp.VApp); err != nil {
-					return VApp{}, fmt.Errorf("error decoding vApp response: %s", err.Error())
-				}
-
-				return *newvapp, nil
-
+				ref = resent
+				break
 			}
 		}
 	}
-	return VApp{}, fmt.Errorf("can't find vApp: %s", vapp)
+
+	if ref == nil {
+		return VApp{}, fmt.Errorf("can't find vApp: %s", vapp)
+	}
+
+	u, err := url.ParseRequestURI(ref.HREF)
+	if err != nil {
+		return VApp{}, fmt.Errorf("error decoding vdc response: %s", err)
+	}
+
+	// Querying the VApp
+	req := v.c.NewRequest(map[string]string{}, "GET", *u, nil)
+	resp, err := checkResp(v.c.Http.Do(req))
+	if err != nil {
+		return VApp{}, fmt.Errorf("error retrieving vApp: %s", err)
+	}
+	defer resp.Body.Close()
+
+	newvapp := NewVApp(v.c)
+	if err = decodeBody(resp, newvapp.VApp); err != nil {
+		return VApp{}, fmt.Errorf("error decoding vApp response: %s", err.Error())
+	}
+
+	return *newvapp, nil
 }
 
-func (v *Vdc) FindVMByName(vapp VApp, vm string) (VM, error) {
-
+func (v *Vdc) FindVMByName(vapp VApp, vmName string) (VM, error) {
 	err := v.Refresh()
 	if err != nil {
 		return VM{}, fmt.Errorf("error refreshing vdc: %s", err)
@@ -352,47 +350,42 @@ func (v *Vdc) FindVMByName(vapp VApp, vm string) (VM, error) {
 	}
 
 	//vApp Might Not Have Any VMs
-
 	if vapp.VApp.Children == nil {
 		return VM{}, fmt.Errorf("VApp Has No VMs")
 	}
 
-	log.Printf("[TRACE] Looking for VM: %s", vm)
+	log.Printf("[TRACE] Looking for VM: %s", vmName)
+	var vm *types.VM
 	for _, child := range vapp.VApp.Children.VM {
-
-		log.Printf("[TRACE] Found: %s", child.Name)
-		if child.Name == vm {
-
-			u, err := url.ParseRequestURI(child.HREF)
-
-			if err != nil {
-				return VM{}, fmt.Errorf("error decoding vdc response: %s", err)
-			}
-
-			// Querying the VApp
-			req := v.c.NewRequest(map[string]string{}, "GET", *u, nil)
-
-			resp, err := checkResp(v.c.Http.Do(req))
-			if err != nil {
-				return VM{}, fmt.Errorf("error retrieving vm: %s", err)
-			}
-
-			newvm := NewVM(v.c)
-
-			//body, err := ioutil.ReadAll(resp.Body)
-			//fmt.Println(string(body))
-
-			if err = decodeBody(resp, newvm.VM); err != nil {
-				return VM{}, fmt.Errorf("error decoding vm response: %s", err.Error())
-			}
-
-			return *newvm, nil
-
+		if child.Name == vmName {
+			vm = child
+			break
 		}
-
 	}
-	log.Printf("[TRACE] Couldn't find VM: %s", vm)
-	return VM{}, fmt.Errorf("can't find vm: %s", vm)
+
+	if vm == nil {
+		return VM{}, fmt.Errorf("can't find vm: %s", vmName)
+	}
+
+	u, err := url.ParseRequestURI(vm.HREF)
+	if err != nil {
+		return VM{}, fmt.Errorf("error decoding vdc response: %s", err)
+	}
+
+	// Querying the VApp
+	req := v.c.NewRequest(map[string]string{}, "GET", *u, nil)
+	resp, err := checkResp(v.c.Http.Do(req))
+	if err != nil {
+		return VM{}, fmt.Errorf("error retrieving vm: %s", err)
+	}
+	defer resp.Body.Close()
+
+	newvm := NewVM(v.c)
+	if err = decodeBody(resp, newvm.VM); err != nil {
+		return VM{}, fmt.Errorf("error decoding vm response: %s", err.Error())
+	}
+
+	return *newvm, nil
 }
 
 func (v *Vdc) GetVMByHREF(vmhref string) (VM, error) {
@@ -410,6 +403,7 @@ func (v *Vdc) GetVMByHREF(vmhref string) (VM, error) {
 	if err != nil {
 		return VM{}, fmt.Errorf("error retrieving VM: %s", err)
 	}
+	defer resp.Body.Close()
 
 	newvm := NewVM(v.c)
 
@@ -434,6 +428,7 @@ func (v *Vdc) GetVAppByHREF(vmhref string) (VApp, error) {
 	if err != nil {
 		return VApp{}, fmt.Errorf("error retrieving VApp: %s", err)
 	}
+	defer resp.Body.Close()
 
 	newVApp := NewVApp(v.c)
 
@@ -443,54 +438,3 @@ func (v *Vdc) GetVAppByHREF(vmhref string) (VApp, error) {
 
 	return *newVApp, nil
 }
-
-// func (v *Vdc) FindVAppByID(vappid string) (VApp, error) {
-
-// 	// Horrible hack to fetch a vapp with its id.
-// 	// urn:vcloud:vapp:00000000-0000-0000-0000-000000000000
-
-// 	err := v.Refresh()
-// 	if err != nil {
-// 		return VApp{}, fmt.Errorf("error refreshing vdc: %s", err)
-// 	}
-
-// 	urnslice := strings.SplitAfter(vappid, ":")
-// 	urnid := urnslice[len(urnslice)-1]
-
-// 	for _, resents := range v.Vdc.ResourceEntities {
-// 		for _, resent := range resents.ResourceEntity {
-
-// 			hrefslice := strings.SplitAfter(resent.HREF, "/")
-// 			hrefslice = strings.SplitAfter(hrefslice[len(hrefslice)-1], "-")
-// 			res := strings.Join(hrefslice[1:], "")
-
-// 			if res == urnid && resent.Type == "application/vnd.vmware.vcloud.vApp+xml" {
-
-// 				u, err := url.ParseRequestURI(resent.HREF)
-
-// 				if err != nil {
-// 					return VApp{}, fmt.Errorf("error decoding vdc response: %s", err)
-// 				}
-
-// 				// Querying the VApp
-// 				req := v.c.NewRequest(map[string]string{}, "GET", *u, nil)
-
-// 				resp, err := checkResp(v.c.Http.Do(req))
-// 				if err != nil {
-// 					return VApp{}, fmt.Errorf("error retrieving vApp: %s", err)
-// 				}
-
-// 				newvapp := NewVApp(v.c)
-
-// 				if err = decodeBody(resp, newvapp.VApp); err != nil {
-// 					return VApp{}, fmt.Errorf("error decoding vApp response: %s", err)
-// 				}
-
-// 				return *newvapp, nil
-
-// 			}
-// 		}
-// 	}
-// 	return VApp{}, fmt.Errorf("can't find vApp")
-
-// }

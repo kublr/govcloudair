@@ -24,34 +24,35 @@ func NewCatalog(c *Client) *Catalog {
 }
 
 func (c *Catalog) FindCatalogItem(catalogitem string) (CatalogItem, error) {
-
+	var ref *types.Reference
 	for _, cis := range c.Catalog.CatalogItems {
-		for _, ci := range cis.CatalogItem {
-			if ci.Name == catalogitem && ci.Type == "application/vnd.vmware.vcloud.catalogItem+xml" {
-				u, err := url.ParseRequestURI(ci.HREF)
-
-				if err != nil {
-					return CatalogItem{}, fmt.Errorf("error decoding catalog response: %s", err)
-				}
-
-				req := c.c.NewRequest(map[string]string{}, "GET", *u, nil)
-
-				resp, err := checkResp(c.c.Http.Do(req))
-				if err != nil {
-					return CatalogItem{}, fmt.Errorf("error retreiving catalog: %s", err)
-				}
-
-				cat := NewCatalogItem(c.c)
-
-				if err = decodeBody(resp, cat.CatalogItem); err != nil {
-					return CatalogItem{}, fmt.Errorf("error decoding catalog response: %s", err)
-				}
-
-				// The request was successful
-				return *cat, nil
-			}
+		ref = cis.CatalogItem.ForName(catalogitem)
+		if ref != nil {
+			break
 		}
 	}
 
-	return CatalogItem{}, fmt.Errorf("can't find catalog item: %s", catalogitem)
+	if ref == nil {
+		return CatalogItem{}, fmt.Errorf("can't find catalog item: %s", catalogitem)
+	}
+
+	u, err := url.ParseRequestURI(ref.HREF)
+	if err != nil {
+		return CatalogItem{}, fmt.Errorf("error decoding catalog response: %s", err)
+	}
+
+	req := c.c.NewRequest(map[string]string{}, "GET", *u, nil)
+	resp, err := checkResp(c.c.Http.Do(req))
+	if err != nil {
+		return CatalogItem{}, fmt.Errorf("error retreiving catalog: %s", err)
+	}
+	defer resp.Body.Close()
+
+	cat := NewCatalogItem(c.c)
+	if err = decodeBody(resp, cat.CatalogItem); err != nil {
+		return CatalogItem{}, fmt.Errorf("error decoding catalog response: %s", err)
+	}
+
+	// The request was successful
+	return *cat, nil
 }

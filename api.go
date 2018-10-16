@@ -57,7 +57,6 @@ func (c *Client) NewRequest(params map[string]string, method string, u url.URL, 
 
 // parseErr takes an error XML resp and returns a single string for use in error messages.
 func parseErr(resp *http.Response) error {
-
 	errBody := new(types.Error)
 
 	// if there was an error decoding the body, just return that
@@ -71,7 +70,6 @@ func parseErr(resp *http.Response) error {
 
 // decodeBody is used to XML decode a response body
 func decodeBody(resp *http.Response, out interface{}) error {
-
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
@@ -102,6 +100,7 @@ func checkResp(resp *http.Response, err error) (*http.Response, error) {
 		return resp, nil
 		// Invalid request, parse the XML error returned and return it.
 	case i == 400 || i == 401 || i == 403 || i == 404 || i == 405 || i == 406 || i == 409 || i == 415 || i == 500 || i == 503 || i == 504:
+		defer resp.Body.Close()
 		return nil, parseErr(resp)
 		// Unhandled response.
 	default:

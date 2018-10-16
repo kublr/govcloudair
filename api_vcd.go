@@ -150,6 +150,7 @@ func (c *VCDClient) RetrieveOrg(vcdname string) (Org, error) {
 	if err != nil {
 		return Org{}, fmt.Errorf("error retreiving org: %s", err)
 	}
+	defer resp.Body.Close()
 
 	org := NewOrg(&c.Client)
 
@@ -240,8 +241,11 @@ func (c *VCDClient) Disconnect() error {
 	// Set Authorization Header
 	req.Header.Add(c.Client.VCDAuthHeader, c.Client.VCDToken)
 
-	if _, err := checkResp(c.Client.Http.Do(req)); err != nil {
+	resp, err := checkResp(c.Client.Http.Do(req))
+	if err != nil {
 		return fmt.Errorf("error processing session delete for vCloud Director: %s", err)
 	}
+	defer resp.Body.Close()
+
 	return nil
 }

@@ -124,6 +124,7 @@ func (c *VAClient) vaacquireservice(s url.URL, cid string) (u url.URL, err error
 	if err != nil {
 		return url.URL{}, fmt.Errorf("error processing compute action: %s", err)
 	}
+	defer resp.Body.Close()
 
 	services := new(services)
 
@@ -161,6 +162,7 @@ func (c *VAClient) vaacquirecompute(s url.URL, vid string) (u url.URL, err error
 	if err != nil {
 		return url.URL{}, fmt.Errorf("error processing compute action: %s", err)
 	}
+	defer resp.Body.Close()
 
 	computeresources := new(computeResources)
 
@@ -316,9 +318,11 @@ func (c *VAClient) Disconnect() error {
 	// Set Authorization Header
 	req.Header.Add("x-vchs-authorization", c.VAToken)
 
-	if _, err := checkResp(c.Client.Http.Do(req)); err != nil {
+	resp, err := checkResp(c.Client.Http.Do(req))
+	if err != nil {
 		return fmt.Errorf("error processing session delete for vchs: %s", err)
 	}
+	defer resp.Body.Close()
 
 	return nil
 }

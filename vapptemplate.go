@@ -40,6 +40,7 @@ func (v *Vdc) InstantiateVAppTemplate(template *types.InstantiateVAppTemplatePar
 	if err != nil {
 		return fmt.Errorf("error instantiating a new template: %s", err)
 	}
+	defer resp.Body.Close()
 
 	vapptemplate := NewVAppTemplate(v.c)
 	if err = decodeBody(resp, vapptemplate.VAppTemplate); err != nil {

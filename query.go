@@ -23,7 +23,6 @@ func NewResults(c *Client) *Results {
 }
 
 func (c *VCDClient) Query(params map[string]string) (Results, error) {
-
 	req := c.Client.NewRequest(params, "GET", c.QueryHREF, nil)
 	req.Header.Add(GetVersionHeader(types.ApiVersion))
 
@@ -31,6 +30,7 @@ func (c *VCDClient) Query(params map[string]string) (Results, error) {
 	if err != nil {
 		return Results{}, fmt.Errorf("error retreiving query: %s", err)
 	}
+	defer resp.Body.Close()
 
 	results := NewResults(&c.Client)
 

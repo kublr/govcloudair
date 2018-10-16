@@ -46,6 +46,7 @@ func (v *VApp) Refresh() error {
 		log.Printf("[DEBUG] Error from HTTP Request: %#v", err)
 		return fmt.Errorf("error retrieving task: %s", err)
 	}
+	defer resp.Body.Close()
 
 	// Empty struct before a new unmarshal, otherwise we end up with duplicate
 	// elements in slices.
@@ -68,7 +69,7 @@ func (v *VApp) AddVMs(sourceItems []*types.SourcedCompositionItemParam) (Task, e
 			task.Task = t
 			err := task.WaitTaskCompletion()
 			if err != nil {
-				return Task{}, fmt.Errorf("Error performing task: %#v", err)
+				return Task{}, fmt.Errorf("error performing task: %#v", err)
 			}
 		}
 	}
@@ -109,7 +110,7 @@ func (v *VApp) RemoveVMs(vms []*types.VM) (Task, error) {
 			task.Task = t
 			err := task.WaitTaskCompletion()
 			if err != nil {
-				return Task{}, fmt.Errorf("Error performing task: %#v", err)
+				return Task{}, fmt.Errorf("error performing task: %#v", err)
 			}
 		}
 	}
@@ -238,6 +239,7 @@ func (v *VApp) ComposeVApp(name string, description string, networkConfiguration
 		log.Printf("[DEBUG] Error from HTTP Request: %#v", err)
 		return Task{}, fmt.Errorf("error instantiating a new vApp: %s", err)
 	}
+	defer resp.Body.Close()
 
 	if err = decodeBody(resp, v.VApp); err != nil {
 		return Task{}, fmt.Errorf("error decoding vApp response: %s", err)

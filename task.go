@@ -38,6 +38,7 @@ func (t *Task) Refresh() error {
 	if err != nil {
 		return fmt.Errorf("error retrieving task: %s", err)
 	}
+	defer resp.Body.Close()
 
 	// Empty struct before a new unmarshal, otherwise we end up with duplicate
 	// elements in slices.

@@ -43,6 +43,7 @@ func ExecuteRequest(payload, path, type_, contentType string, client *Client) (T
 	if err != nil {
 		return Task{}, err
 	}
+	defer resp.Body.Close()
 
 	task := NewTask(client)
 

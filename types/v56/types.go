@@ -535,7 +535,7 @@ type ResourceReference struct {
 // Description: Container for references to storage profiles associated with a vDC.
 // Since: 5.1
 type VdcStorageProfiles struct {
-	VdcStorageProfile []*Reference `xml:"VdcStorageProfile,omitempty"`
+	VdcStorageProfile ReferenceList `xml:"VdcStorageProfile,omitempty"`
 }
 
 // ResourceEntities is a container for references to ResourceEntity objects in this vDC.
@@ -553,7 +553,7 @@ type ResourceEntities struct {
 // Description: Container for references to available organization vDC networks.
 // Since: 0.9
 type AvailableNetworks struct {
-	Network []*Reference `xml:"Network,omitempty"`
+	Network ReferenceList `xml:"Network,omitempty"`
 }
 
 // Link extends reference type by adding relation attribute. Defines a hyper-link with a relationship, hyper-link reference, and an optional MIME type.
@@ -629,7 +629,7 @@ type Entity struct {
 // Description: Container for references to catalog items.
 // Since: 0.9
 type CatalogItems struct {
-	CatalogItem []*Reference `xml:"CatalogItem"`
+	CatalogItem ReferenceList `xml:"CatalogItem"`
 }
 
 // Catalog represents the user view of a Catalog object.
@@ -739,10 +739,10 @@ type VMCapabilities struct {
 // Description: Represents a list of virtual machines.
 // Since: 5.1
 type VMs struct {
-	HREF        string       `xml:"href,attr,omitempty"`
-	Type        string       `xml:"type,attr,omitempty"`
-	Link        LinkList     `xml:"Link,omitempty"`
-	VMReference []*Reference `xml:"VmReference,omitempty"`
+	HREF        string        `xml:"href,attr,omitempty"`
+	Type        string        `xml:"type,attr,omitempty"`
+	Link        LinkList      `xml:"Link,omitempty"`
+	VMReference ReferenceList `xml:"VmReference,omitempty"`
 }
 
 /*
@@ -1097,7 +1097,7 @@ type VirtualHardwareItem struct {
 	CoresPerSocket      int                            `xml:"CoresPerSocket,omitempty"`
 	Connection          []*VirtualHardwareConnection   `xml:"Connection,omitempty"`
 	HostResource        []*VirtualHardwareHostResource `xml:"HostResource,omitempty"`
-	Link                []*Link                        `xml:"Link,omitempty"`
+	Link                LinkList                       `xml:"Link,omitempty"`
 }
 
 // Connection info from ResourceType=10 (Network Interface)
@@ -1725,7 +1725,7 @@ type QueryResultEdgeGatewayRecordsType struct {
 	PageSize int     `xml:"pageSize,attr,omitempty"` // Page size, as a number of records or references.
 	Total    float64 `xml:"total,attr,omitempty"`    // Total number of records or references in the container.
 	// Elements
-	Link              []*Link                             `xml:"Link,omitempty"`    // A reference to an entity or operation associated with this object.
+	Link              LinkList                            `xml:"Link,omitempty"`    // A reference to an entity or operation associated with this object.
 	EdgeGatewayRecord []*QueryResultEdgeGatewayRecordType `xml:"EdgeGatewayRecord"` // A record representing a EdgeGateway result.
 }
 
@@ -1738,7 +1738,7 @@ type QueryResultRecordsType struct {
 	PageSize int     `xml:"pageSize,attr,omitempty"` // Page size, as a number of records or references.
 	Total    float64 `xml:"total,attr,omitempty"`    // Total number of records or references in the container.
 	// Elements
-	Link                       []*Link                                      `xml:"Link,omitempty"`             // A reference to an entity or operation associated with this object.
+	Link                       LinkList                                     `xml:"Link,omitempty"`             // A reference to an entity or operation associated with this object.
 	EdgeGatewayRecord          []*QueryResultEdgeGatewayRecordType          `xml:"EdgeGatewayRecord"`          // A record representing a EdgeGateway result.
 	VMRecord                   []*QueryResultVMRecordType                   `xml:"VMRecord"`                   // A record representing a VM result.
 	VAppRecord                 []*QueryResultVAppRecordType                 `xml:"VAppRecord"`                 // A record representing a VApp result.
