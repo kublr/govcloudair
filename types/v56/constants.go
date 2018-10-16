@@ -59,6 +59,8 @@ const (
 	MimeError = "application/vnd.vmware.vcloud.error+xml"
 	// MimeNetwork mime for a network
 	MimeNetwork = "application/vnd.vmware.vcloud.network+xml"
+	// MimeMedia mime for Media object
+	MimeMedia = "application/vnd.vmware.vcloud.media+xml"
 )
 
 const (

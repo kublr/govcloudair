@@ -10,6 +10,14 @@
   revision = "7e38e58719c33e0d44d585c4ab477a30f8cb82dd"
 
 [[projects]]
+  digest = "1:5cf3f025cbee5951a4ee961de067c8a89fc95a5adabead774f82822efabab121"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   branch = "v1"
   digest = "1:0c0dfc6cf4abe5dab1ed03118f6cff3ac7345317dce2f35b32fe820b0154f6a1"
   name = "gopkg.in/check.v1"
@@ -22,6 +30,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/jinzhu/copier",
+    "github.com/pkg/errors",
     "gopkg.in/check.v1",
   ]
   solver-name = "gps-cdcl"

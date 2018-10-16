@@ -5,11 +5,11 @@
 package govcloudair
 
 import (
-	"fmt"
 	"net/url"
 	"time"
 
 	"github.com/kublr/govcloudair/types/v56"
+	"github.com/pkg/errors"
 )
 
 type Task struct {
@@ -25,54 +25,59 @@ func NewTask(c *Client) *Task {
 }
 
 func (t *Task) Refresh() error {
-
-	if t.Task == nil {
-		return fmt.Errorf("cannot refresh, Object is empty")
+	u, err := url.ParseRequestURI(t.Task.HREF)
+	if err != nil {
+		return errors.Wrapf(err, "cannot parse url: %s", t.Task.HREF)
 	}
 
-	u, _ := url.ParseRequestURI(t.Task.HREF)
-
 	req := t.c.NewRequest(map[string]string{}, "GET", *u, nil)
-
 	resp, err := checkResp(t.c.Http.Do(req))
 	if err != nil {
-		return fmt.Errorf("error retrieving task: %s", err)
+		return errors.Wrapf(err, "cannot execute request: %s", t.Task.HREF)
 	}
 	defer resp.Body.Close()
 
-	// Empty struct before a new unmarshal, otherwise we end up with duplicate
-	// elements in slices.
-	t.Task = &types.Task{}
-
-	if err = decodeBody(resp, t.Task); err != nil {
-		return fmt.Errorf("error decoding task response: %s", err)
+	newTask := &types.Task{}
+	if err = decodeBody(resp, newTask); err != nil {
+		return errors.Wrapf(err, "cannot unmarshal response: %s", t.Task.HREF)
 	}
 
-	// The request was successful
+	t.Task = newTask
 	return nil
 }
 
 func (t *Task) WaitTaskCompletion() error {
-
-	if t.Task == nil {
-		return fmt.Errorf("cannot refresh, Object is empty")
-	}
-
 	for {
 		err := t.Refresh()
 		if err != nil {
-			return fmt.Errorf("error retreiving task: %s", err)
+			return err
 		}
 
 		// If task is not in a waiting status we're done, check if there's an error and return it.
 		if t.Task.Status != "queued" && t.Task.Status != "preRunning" && t.Task.Status != "running" {
-			if t.Task.Status == "error" {
-				return fmt.Errorf("task did not complete succesfully: %s", t.Task.Description)
+			if t.Task.Status != "success" {
+				return errors.Errorf("task %s did not completed successfully: %s", t.Task.Name, t.Task.Description)
 			}
+
 			return nil
 		}
 
-		// Sleep for 3 seconds and try again.
-		time.Sleep(3 * time.Second)
+		time.Sleep(1 * time.Second)
 	}
+}
+
+func (t *Task) Cancel() error {
+	u, err := url.ParseRequestURI(t.Task.Link.HREF)
+	if err != nil {
+		return errors.Wrapf(err, "cannot parse url: %s", t.Task.Link.HREF)
+	}
+
+	req := t.c.NewRequest(map[string]string{}, "POST", *u, nil)
+	resp, err := checkResp(t.c.Http.Do(req))
+	if err != nil {
+		return errors.Wrapf(err, "cannot execute request: %s", t.Task.Link.HREF)
+	}
+	defer resp.Body.Close()
+
+	return nil
 }

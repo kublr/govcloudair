@@ -1909,6 +1909,31 @@ type OVFVirtualHardwareHostResource struct {
 	OverrideVmDefault bool   `xml:"vcloud:storageProfileOverrideVmDefault,attr,omitempty"`
 }
 
+// Media represents a Media object.
+// Type: MediaType
+// Namespace: http://www.vmware.com/vcloud/v1.5
+// Description: Represents a Media object.
+// Since: 0.9
+type Media struct {
+	// Attributes
+	Xmlns        string `xml:"xmlns,attr"`
+	HREF         string `xml:"href,attr,omitempty"`         // The URI of the entity.
+	Type         string `xml:"type,attr,omitempty"`         // The MIME type of the entity.
+	ID           string `xml:"id,attr,omitempty"`           // The entity identifier, expressed in URN format. The value of this attribute uniquely identifies the entity, persists for the life of the entity, and is never reused.
+	OperationKey string `xml:"operationKey,attr,omitempty"` // Optional unique identifier to support idempotent semantics for create and delete operations.
+	Name         string `xml:"name,attr"`                   // The name of the entity.
+	Status       int    `xml:"status,attr,omitempty"`       // Creation status of the resource entity.
+	ImageType    string `xml:"imageType,attr,omitempty"`    // Media image type. One of: iso, floppy.
+	Size         int64  `xml:"size,attr,omitempty"`         // Size of the media file, in bytes.
+	// Elements
+	Description       string           `xml:"Description,omitempty"`       // Optional description.
+	Files             *FilesList       `xml:"Files,omitempty"`             // Represents a list of files to be transferred (uploaded or downloaded). Each File in the list is part of the ResourceEntity.
+	Link              LinkList         `xml:"Link,omitempty"`              // A reference to an entity or operation associated with this object.
+	Owner             *Owner           `xml:"Owner,omitempty"`             // Media owner.
+	Tasks             *TasksInProgress `xml:"Tasks,omitempty"`             // A list of queued, running, or recently completed tasks associated with this entity.
+	VdcStorageProfile *Reference       `xml:"VdcStorageProfile,omitempty"` // A reference to a storage profile to be used for this object. The specified storage profile must exist in the organization vDC that contains the object. If not specified, the default storage profile for the vDC is used.
+}
+
 func (v *VirtualHardwareSection) ConvertToOVF() *OVFVirtualHardwareSection {
 	ovf := OVFVirtualHardwareSection{}
 
