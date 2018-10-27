@@ -29,7 +29,12 @@ codestyle:
 	GOOS=$(GOOS) $(GOBINARY) vet $(SOURCE)
 .PHONY: codestyle
 
-test: codestyle
+build: codestyle
+	@echo "==> Building"
+	GOOS=$(GOOS) $(GOBINARY) build -v $(SOURCE)
+.PHONY: build
+
+test: build
 	@echo "==> Running tests"
 	GOOS=$(GOOS) $(GOBINARY) test -v $(SOURCE)
 .PHONY: test
