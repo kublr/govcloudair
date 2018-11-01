@@ -17,21 +17,12 @@
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
 
-[[projects]]
-  branch = "v1"
-  digest = "1:0c0dfc6cf4abe5dab1ed03118f6cff3ac7345317dce2f35b32fe820b0154f6a1"
-  name = "gopkg.in/check.v1"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "20d25e2804050c1cd24a7eea1e7a6447dd0e74ec"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/jinzhu/copier",
     "github.com/pkg/errors",
-    "gopkg.in/check.v1",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
