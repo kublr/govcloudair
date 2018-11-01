@@ -6,7 +6,3 @@
 [[constraint]]
   branch = "master"
   name = "github.com/jinzhu/copier"
-
-[[constraint]]
-  branch = "v1"
-  name = "gopkg.in/check.v1"
