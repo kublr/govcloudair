@@ -1,7 +1,7 @@
 all: test
 
 # Configuration
-GOOS ?= linux
+GOOS ?=
 GOBINARY ?= go
 
 SOURCE=$$($(GOBINARY) list ./... | grep -v /vendor/ | grep -v /gen/)
